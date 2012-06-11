@@ -6,6 +6,18 @@ include_directories(include)
 
 find_package(OpenGL REQUIRED)
 
+if(DEFINED EMSCRIPTEN_ACTIVE)
+	if(NOT DEFINED ENV{EMSCRIPTEN_LIBPNG})
+		message(FATAL_ERROR "Please define the environment variable $EMSCRIPTEN_LIBPNG that points to libpng.js.")
+	endif(NOT DEFINED ENV{EMSCRIPTEN_LIBPNG})
+	if(NOT DEFINED ENV{EMSCRIPTEN_ZLIB})
+		message(FATAL_ERROR "Please define the environment variable $EMSCRIPTEN_ZLIB that points to zlib.js.")
+	endif(NOT DEFINED ENV{EMSCRIPTEN_ZLIB})
+	add_definitions(-DNO_OPENGL -DTCOD_EMSCRIPTEN)
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c89")
+	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --preload-file ${CMAKE_CURRENT_SOURCE_DIR}/data/fonts/consolas10x10_gs_tc.png --base-dir ${CMAKE_CURRENT_SOURCE_DIR}")
+endif(DEFINED EMSCRIPTEN_ACTIVE)
+
 SET(ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 SET(INSTALL_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 SET(DEPENDENCY_DIR ${CMAKE_CURRENT_SOURCE_DIR}/dependencies)

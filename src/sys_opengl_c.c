@@ -153,6 +153,7 @@ static unsigned char *data[ConsoleDataEnumSize];
 static bool dirty[ConsoleDataEnumSize];
 
 /* extension function pointers */
+#ifndef TCOD_EMSCRIPTEN
 static PFNGLCREATESHADEROBJECTARBPROC glCreateShaderObjectARB=0;
 static PFNGLGETOBJECTPARAMETERIVARBPROC glGetObjectParameterivARB=0;
 static PFNGLSHADERSOURCEARBPROC glShaderSourceARB=0;
@@ -168,6 +169,7 @@ static PFNGLUNIFORM1FARBPROC glUniform1fARB=0;
 static PFNGLUNIFORM1IARBPROC glUniform1iARB=0;
 #ifdef TCOD_WINDOWS
 static PFNGLACTIVETEXTUREPROC glActiveTexture=0;
+#endif
 #endif
                                         
 /* call after creating window */
@@ -192,6 +194,7 @@ bool TCOD_opengl_init_state(int conw, int conh, void *font) {
 		}
 	}
 
+#ifndef TCOD_EMSCRIPTEN
 	/* set extensions functions pointers */
    	glCreateShaderObjectARB=(PFNGLCREATESHADEROBJECTARBPROC)SDL_GL_GetProcAddress("glCreateShaderObjectARB");
 	glGetObjectParameterivARB=(PFNGLGETOBJECTPARAMETERIVARBPROC)SDL_GL_GetProcAddress("glGetObjectParameterivARB");
@@ -208,6 +211,7 @@ bool TCOD_opengl_init_state(int conw, int conh, void *font) {
 	glUniform1iARB=(PFNGLUNIFORM1IARBPROC)SDL_GL_GetProcAddress("glUniform1iARB");
 #ifdef TCOD_WINDOWS	
 	glActiveTexture=(PFNGLACTIVETEXTUREPROC)SDL_GL_GetProcAddress("glActiveTexture");
+#endif
 #endif
 	
 	/* set opengl state */

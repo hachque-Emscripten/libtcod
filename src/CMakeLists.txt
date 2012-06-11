@@ -50,19 +50,31 @@ SET(LIBTCOD_GUI_SRC gui/button.cpp gui/container.cpp gui/flatlist.cpp gui/hbox.c
 
 # Linux wants seperate C and C++ libraries.
 IF(UNIX AND NOT APPLE)
-	add_library(${LIBTCOD_NAME} SHARED ${LIBTCOD_C_SRC})
+	add_library(${LIBTCOD_NAME} ${LIBTCOD_C_SRC})
 	target_link_libraries(${LIBTCOD_NAME} ${PNG_NAME} ${SDL_NAME} ${ZLIB_NAME} ${OPENGL_LIBRARY} ${M_LIB} ${EFENCE_LIBRARY})
+	if(DEFINED EMSCRIPTEN_ACTIVE)
+		set_target_properties(${LIBTCOD_NAME} PROPERTIES SUFFIX ".js")
+	endif(DEFINED EMSCRIPTEN_ACTIVE)
 
-	add_library(${LIBTCOD_CPP_NAME} SHARED ${LIBTCOD_CPP_SRC})
+	add_library(${LIBTCOD_CPP_NAME} ${LIBTCOD_CPP_SRC})
 	target_link_libraries(${LIBTCOD_CPP_NAME} ${LIBTCOD_NAME} ${PNG_NAME} ${SDL_NAME} ${ZLIB_NAME} ${OPENGL_LIBRARY} ${M_LIB} ${EFENCE_LIBRARY})
+	if(DEFINED EMSCRIPTEN_ACTIVE)
+		set_target_properties(${LIBTCOD_CPP_NAME} PROPERTIES SUFFIX ".js")
+	endif(DEFINED EMSCRIPTEN_ACTIVE)
 ELSE()
-	add_library(${LIBTCOD_NAME} SHARED ${LIBTCOD_C_SRC} ${LIBTCOD_CPP_SRC})
+	add_library(${LIBTCOD_NAME} ${LIBTCOD_C_SRC} ${LIBTCOD_CPP_SRC})
 	target_link_libraries(${LIBTCOD_NAME} ${PNG_NAME} ${SDL_NAME} ${ZLIB_NAME} ${OPENGL_LIBRARY}) 
+	if(DEFINED EMSCRIPTEN_ACTIVE)
+		set_target_properties(${LIBTCOD_NAME} PROPERTIES SUFFIX ".js")
+	endif(DEFINED EMSCRIPTEN_ACTIVE)
 ENDIF()
 
 include_directories(${GUI_INCLUDE_DIR})
-add_library(${LIBTCOD_GUI_NAME} SHARED ${LIBTCOD_GUI_SRC})
+add_library(${LIBTCOD_GUI_NAME} ${LIBTCOD_GUI_SRC})
 target_link_libraries(${LIBTCOD_GUI_NAME} ${LIBTCOD_NAME} ${LIBTCOD_CPP_NAME}) 	#${LIBTCOD_CPP_NAME} is empty on non-linux platforms
+if(DEFINED EMSCRIPTEN_ACTIVE)
+	set_target_properties(${LIBTCOD_GUI_NAME} PROPERTIES SUFFIX ".js")
+endif(DEFINED EMSCRIPTEN_ACTIVE)
 
 IF(MSVC OR MINGW)
 	# Since we're exporting functions and clases, we use the "standard" macro combinations to do so under msvc.
@@ -89,7 +101,9 @@ IF(UNIX)
 ENDIF()
 
 #${LIBTCOD_CPP_NAME} is empty on non-linux platforms
-INSTALL(TARGETS ${LIBTCOD_NAME} ${LIBTCOD_GUI_NAME} ${LIBTCOD_CPP_NAME}
-  RUNTIME DESTINATION ${INSTALL_DIR}
-  LIBRARY DESTINATION ${INSTALL_DIR}
-)
+if(NOT DEFINED EMSCRIPTEN_ACTIVE)
+	INSTALL(TARGETS ${LIBTCOD_NAME} ${LIBTCOD_GUI_NAME} ${LIBTCOD_CPP_NAME}
+		RUNTIME DESTINATION ${INSTALL_DIR}
+		LIBRARY DESTINATION ${INSTALL_DIR}
+	)
+endif(NOT DEFINED EMSCRIPTEN_ACTIVE)

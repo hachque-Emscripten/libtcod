@@ -20,7 +20,12 @@ ENDIF()
 SET(LIBTCOD_RADIOSITY_SRC main.cpp bsp_helper.cpp rad_shader.cpp rad_shader_photon.cpp rad_shader_standard.cpp)
 
 add_executable(rad ${LIBTCOD_RADIOSITY_SRC})
-target_link_libraries(rad ${LIBTCOD_NAME} ${LIBTCOD_CPP_NAME}) 
+if(DEFINED EMSCRIPTEN_ACTIVE)
+	target_link_libraries(rad ${LIBTCOD_NAME} ${LIBTCOD_CPP_NAME} $ENV{EMSCRIPTEN_LIBPNG} $ENV{EMSCRIPTEN_ZLIB})
+	set_target_properties(rad PROPERTIES SUFFIX ".html")
+else(DEFINED EMSCRIPTEN_ACTIVE)
+	target_link_libraries(rad ${LIBTCOD_NAME} ${LIBTCOD_CPP_NAME}) 
+endif(DEFINED EMSCRIPTEN_ACTIVE)
 
 IF(UNIX)
 	SET(CMAKE_EXE_LINKER_FLAGS "-Wl,-rpath,. ${CMAKE_EXE_LINKER_FLAGS}")

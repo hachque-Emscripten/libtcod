@@ -1401,28 +1401,35 @@ int nb_samples = sizeof(samples)/sizeof(sample_t); /* total number of samples */
 /* ***************************
  * the main function
  * ***************************/
-
+#ifdef TCOD_EMSCRIPTEN
+void __emscripten_run();
+#else
 int main( int argc, char *argv[] ) {
-	int cur_sample=0; /* index of the current sample */
-	bool first=true; /* first time we render a sample */
-	int i;
-	TCOD_key_t key = {TCODK_NONE,0};
-	TCOD_mouse_t mouse;
-	char *font="data/fonts/consolas10x10_gs_tc.png";
-	int nb_char_horiz=0,nb_char_vertic=0;
-	int argn;
-	int fullscreen_width=0;
-	int fullscreen_height=0;
-	int font_flags=TCOD_FONT_TYPE_GREYSCALE|TCOD_FONT_LAYOUT_TCOD;
-	int font_new_flags=0;
-	TCOD_renderer_t renderer=TCOD_RENDERER_SDL;
-	bool fullscreen=false;
-	bool credits_end=false;
-	int cur_renderer=0;
-	static const char *renderer_name[TCOD_NB_RENDERERS] = {
-		"F1 GLSL   ","F2 OPENGL ","F3 SDL    "
-	};
+#endif
 
+int cur_sample=0; /* index of the current sample */
+bool first=true; /* first time we render a sample */
+int i;
+TCOD_key_t key = {TCODK_NONE,0};
+TCOD_mouse_t mouse;
+char *font="data/fonts/consolas10x10_gs_tc.png";
+int nb_char_horiz=0,nb_char_vertic=0;
+int argn;
+int fullscreen_width=0;
+int fullscreen_height=0;
+int font_flags=TCOD_FONT_TYPE_GREYSCALE|TCOD_FONT_LAYOUT_TCOD;
+int font_new_flags=0;
+TCOD_renderer_t renderer=TCOD_RENDERER_SDL;
+bool fullscreen=false;
+bool credits_end=false;
+int cur_renderer=0;
+static const char *renderer_name[TCOD_NB_RENDERERS] = {
+	"F1 GLSL   ","F2 OPENGL ","F3 SDL    "
+};
+
+#ifdef TCOD_EMSCRIPTEN
+int main( int argc, char *argv[] ) {
+#endif
 	/* initialize the root console (open the game window) */
 	for (argn=1; argn < argc; argn++) {
 		if ( strcmp(argv[argn],"-font") == 0 && argn+1 < argc) {
@@ -1477,7 +1484,15 @@ int main( int argc, char *argv[] ) {
 	TCOD_console_init_root(80,50,"libtcod C sample",fullscreen, renderer);
 	/* initialize the offscreen console for the samples */
 	sample_console = TCOD_console_new(SAMPLE_SCREEN_WIDTH,SAMPLE_SCREEN_HEIGHT);
+#ifdef TCOD_EMSCRIPTEN
+	emscripten_set_main_loop(__emscripten_run, 60);
+}
+
+void __emscripten_run()
+{
+#else
 	do {
+#endif
 		if (! credits_end) {
 			credits_end=TCOD_console_credits_render(60,43,false);
 		}
@@ -1569,8 +1584,12 @@ int main( int argc, char *argv[] ) {
 		} else if (key.vk==TCODK_F3) {
 			TCOD_sys_set_renderer(TCOD_RENDERER_SDL);
 		}
-	} while (!TCOD_console_is_window_closed());
-	return 0;
+#ifdef TCOD_EMSCRIPTEN
+	if (TCOD_console_is_window_closed())
+		emscripten_cancel_main_loop();
+#else
+	} while (!TCOD_console_is_window_closed()) ;
+#endif
 }
 
 
